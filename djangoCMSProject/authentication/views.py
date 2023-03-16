@@ -15,44 +15,53 @@ def register_template(request):
 
 @csrf_protect
 def handle_login(request):
-    if request.method == "POST":
-        if not request.user.is_authenticated:
-            username, password = request.POST['username'], request.POST['password']
-            user = authenticate(
-                request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect("/")
+    try:
+        if request.method == "POST":
+            if not request.user.is_authenticated:
+                username, password = request.POST['username'], request.POST['password']
+                user = authenticate(
+                    request, username=username, password=password)
+                if user is not None:
+                    login(request, user)
+                    return redirect("/")
+                else:
+                    return HttpResponse('Invalid User')
             else:
-                return HttpResponse('Invalid User')
-        else:
-            return HttpResponse('Already Logged In')
+                return HttpResponse('Already Logged In')
+    except Exception as error:
+        return HttpResponse("{0}".format(error))
 
 
 @csrf_protect
 def handle_signup(request):
-    if request.method == "POST":
-        first_name, last_name, username, password = request.POST['first_name'], request.POST[
-            'last_name'], request.POST['username'], request.POST['password']
-        if request.user.is_authenticated:
-            return redirect("/")
+    try:
+        if request.method == "POST":
+            first_name, last_name, username, password = request.POST['first_name'], request.POST[
+                'last_name'], request.POST['username'], request.POST['password']
+            if request.user.is_authenticated:
+                return redirect("/")
 
-        if not User.objects.filter(username=username).exists():
+            if not User.objects.filter(username=username).exists():
 
-            user = User.objects.create_user(
-                username=username, email=username, password=password)
-            user.first_name = first_name
-            user.last_name = last_name
-            user.is_active = True
-            user.is_superuser = False
-            user.is_staff = False
-            user.save()
-            return redirect('authentication:loginPage')
-        else:
-            return HttpResponse('User already exists')
+                user = User.objects.create_user(
+                    username=username, email=username, password=password)
+                user.first_name = first_name
+                user.last_name = last_name
+                user.is_active = True
+                user.is_superuser = False
+                user.is_staff = False
+                user.save()
+                return redirect('authentication:loginPage')
+            else:
+                return HttpResponse('User already exists')
+    except Exception as error:
+        return HttpResponse("{0}".format(error))
 
 
 def handle_logout(request):
-    if request.user.is_authenticated:
-        logout(request)
-        return redirect("/")
+    try:
+        if request.user.is_authenticated:
+            logout(request)
+            return redirect("/")
+    except Exception as error:
+        return HttpResponse("{0}".format(error))
